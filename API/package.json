@@ -1,11 +1,14 @@
 {
   "name": "teams",
   "version": "1.0.0",
-  "description": "App for friends who want to meet and play",
+  "description": "API for friends who want to meet and play",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
