@@ -19,16 +19,20 @@ var sendMail = async (email, title, content, htmlContent) => {
 
     // send mail with defined transport object
     let info = await transporter.sendMail({
-        from: `"Teams 개발자" <${email.address}>`,
+        from: `"JS talk 개발자" <${email.address}>`,
         to: email,
         subject: title,
         text: content,
         html: htmlContent,
     });
     
-    console.log(`Message send: ${info.messageId}`);
-
     return true;
 }
 
+// return school email address
+var generateSchoolEmail = (stdntId) => {
+    return `21s${stdntId}@jangseung.sen.ms.kr`;
+}
+
 exports.sendMail = sendMail;
+exports.generateSchoolEmail = generateSchoolEmail;
