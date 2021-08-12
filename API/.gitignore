@@ -1,1 +1,4 @@
 node_modules/
+
+# for save secure
+src/lib/secret.js
