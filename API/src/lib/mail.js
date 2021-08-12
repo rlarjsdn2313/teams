@@ -18,7 +18,7 @@ var sendMail = async (email, title, content, htmlContent) => {
     });
 
     // send mail with defined transport object
-    let info = await transporter.sendMail({
+    await transporter.sendMail({
         from: `"JS talk 개발자" <${email.address}>`,
         to: email,
         subject: title,
@@ -26,6 +26,7 @@ var sendMail = async (email, title, content, htmlContent) => {
         html: htmlContent,
     });
     
+
     return true;
 }
 
