@@ -3,6 +3,8 @@ var router = express.Router();
 
 // import sending mail object
 var mail = require('../lib/mail');
+// import lib for connect to mysql DB server
+var createConn = require('../lib/mysqlConn');
 
 
 // checkStdntId
@@ -42,8 +44,9 @@ var checkStdntId = (stdntId) => {
     return '';
 }
 
-let createCode = (stdntId) => {
-    let code = `${Math.floor(Math.random() * (9999 - 0)) + 0}`.padStart(4, '0');
+// createCode need connection with connected to DB
+let createCode = (stdntId, connection) => {
+    let code = parseInt(`${Math.floor(Math.random() * (9999 - 0)) + 0}`.padStart(4, '0'));
     
 }
 /*
@@ -52,6 +55,7 @@ let createCode = (stdntId) => {
 }
 */
 router.post('/', (req, res) => {
+
     let reqKeyList = Object.keys(req.body);
     
     // check stdntId in reqKeyList
@@ -67,7 +71,7 @@ router.post('/', (req, res) => {
 
     // get stdntId
     let stdntId = req.body.stdntId;
-    let check = checkStdntId(stdntId);
+    let check = checkStdntId(String(stdntId));
 
     if (check.length != 0) {
         res.send({
@@ -77,7 +81,19 @@ router.post('/', (req, res) => {
         return;
     }
 
-    let authCode = '213123'
+    // if stdntId is already in user list then send error message
+    // connect to mysql server
+    let connection = createConn.createConnection();
+    connection.connect()
+
+    // check with DB
+    connection.query(`select exists (select StudentId from user where StudentId=${stdntId} limit 1) as succes;`, function(err, result, fileds) {
+        if (err) throw err;
+        console.log(result);
+    });
+
+    connection.end()
+    let authCode = '2313'
 
     mail.sendMail(
         mail.generateSchoolEmail(stdntId),

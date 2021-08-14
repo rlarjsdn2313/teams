@@ -2,15 +2,17 @@
 const express = require('express');
 const app = express();
 
+
 // import middle-ware for post param
 const bodyParser = require('body-parser');
-const createAccount = require('./router/Auth');
+const createAuthCode = require('./router/createAuthCode');
 
 // listening port
 const port = 3000;
 
+
 app.use(bodyParser())
-app.use('/auth', createAccount);
+app.use('/createaccount', createAuthCode);
 
 
 app.get('/', (req, res) => {
