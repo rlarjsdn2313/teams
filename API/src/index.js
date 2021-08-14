@@ -4,13 +4,13 @@ const app = express();
 
 // import middle-ware for post param
 const bodyParser = require('body-parser');
-const auth = require('./router/Auth');
+const createAccount = require('./router/Auth');
 
 // listening port
 const port = 3000;
 
 app.use(bodyParser())
-app.use('/auth', auth);
+app.use('/auth', createAccount);
 
 
 app.get('/', (req, res) => {
