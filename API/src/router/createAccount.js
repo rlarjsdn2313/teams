@@ -47,14 +47,24 @@ router.post('/', (req, res) => {
     // get request key list
     var reqKeyList = Object.keys(req.body);
 
-    // check how many reqKey
-    if (reqKeyList.length !== neededKeyList) {
-        res.send({
-            error: true,
-            message: 'request error'
-        });
-        return;
+    for (var i=0; i<4; i++) {
+        var check = true;
+
+        for (var a=0; a<reqKeyList.length; a++) {
+            if (reqKeyList[a] == neededKeyList[i]) {
+                check = false;
+                break;
+            }
+        }
+        if (check) {
+            res.send({
+                error: true,
+                message: 'request error'
+            });
+            return;
+        }
     }
+
 
     /*
     2. Filter each params
@@ -63,11 +73,11 @@ router.post('/', (req, res) => {
     // get stdntId
     var stdntId = req.body.stdntId;
     // filter stdntId
-    var errMsg = checkStdntId(stdntId);
+    var errMsg = checkStdntId(String(stdntId));
     if (errMsg.length > 0) {
         res.send({
             error: true,
-            message: check
+            message: errMsg
         });
         return;
     }
@@ -84,7 +94,7 @@ router.post('/', (req, res) => {
     }
 
     // check auth code is N
-    if (!(authCode % 1 != 0)) {
+    if (authCode % 1 != 0) {
         res.send({
             error: true,
             message: 'authCode must be N'
@@ -107,4 +117,54 @@ router.post('/', (req, res) => {
     var userName = req.body.userName;
     
 
+    // password
+    // get password
+    var password = req.body.password;
+
+
+    /*
+    3. Connect to DB and check stdntId and authCode
+    */
+    // create connection to DB
+    let connection = createConn.createConnection();
+    connection.connect();
+
+    // query to DB
+    connection.query(`SELECT Code FROM auth_code WHERE StudentId=${stdntId};`, (err, result, fileds) => {
+        if (err) throw err;
+        let realAuthCode = result[0]['Code'];
+
+        // wrong auth code
+        if (realAuthCode != authCode) {
+            res.send({
+                error: true,
+                message: 'autCode is wrong'
+            });
+            return;
+        }
+
+        // delete code in DB
+        connection.query(`DELETE FROM auth_code WHERE Code=${realAuthCode}`, (err, result, fileds) => {
+            if (err) throw err;
+        });
+
+
+        /*
+        4. Connect to user table and create account
+        */
+        // add user data
+        connection.query(`INSERT INTO user VALUES (${stdntId}, '${userName}', '${password}', 'basic', '', '');`, (err, result, fileds) => {
+            if (err) throw err;
+
+            res.send({
+                error: false,
+                message: 'Your Account Is Created!'
+            });
+            return;
+        });
+    });
 });
+
+
+// export router
+module.exports = router;
