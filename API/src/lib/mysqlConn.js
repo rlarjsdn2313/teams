@@ -8,9 +8,9 @@ var mysql = require('mysql');
 // You have to connect to DB server by connection.connect() function
 var createConnection = () => {
     // make mysql connection
-    let connection = mysql.createConnection({
+    let connection = mysql.createConnection(
         secret
-    });
+    );
 
     // return connection to mysql server
     return connection;
