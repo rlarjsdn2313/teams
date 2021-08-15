@@ -44,24 +44,11 @@ var checkStdntId = (stdntId) => {
     return '';
 }
 
-// createCode need connection with connected to DB
-let createCode = (stdntId, connection) => {
-    let code = parseInt(`${Math.floor(Math.random() * (9999 - 0)) + 0}`.padStart(4, '0'));
-    
-}
 /*
 {
     stdntId: 학번
 }
 */
-
-let sendError = (res, message) => {
-    res.send({
-        error: true,
-        message: message,
-    });
-}
-
 router.post('/', (req, res) => {
 
     let reqKeyList = Object.keys(req.body);
@@ -99,7 +86,7 @@ router.post('/', (req, res) => {
         // count how many stdntId in user DB
         if (result[0]['count(*)'] >= 1) {
             // send error message
-            sendError(res, {
+            res.send({
                 error: true,
                 message: 'this stdunt ID is already in user DB',
             });
@@ -107,23 +94,35 @@ router.post('/', (req, res) => {
             return;
         }
 
-        let authCode = '2313'
+        /*
+        Creating Verification Code Part
+        1. Create verification in random
+        2. Send the code to MYSQL DB
+        */
+       
+        // Create verification code in random
+        let code = parseInt(`${Math.floor(Math.random() * (9999 - 0)) + 0}`.padStart(4, '0'));
 
-        mail.sendMail(
-            mail.generateSchoolEmail(stdntId),
-            'JS talk 회원가입 인증 메일',
-            `인증 코드 : ${authCode}`,
-            `<b>인증 코드 : ${authCode}`,
-        );
-    
-        res.send({
-            error: false,
-            message: 'Authorization email sent'
+        // Send the verification code to DB
+        connection.query(`INSERT INTO auth_code VALUES (${stdntId}, ${code})`, (err) => {
+            if (err) throw err;
+
+            // Send mail
+            mail.sendMail(
+                mail.generateSchoolEmail(stdntId),
+                'JS talk 회원가입 인증 메일',
+                `인증 코드 : ${code}`,
+                `<b>인증 코드 : ${code}`,
+            );
+        
+            res.send({
+                error: false,
+                message: 'Authorization email sent'
+            });
+        
+            return;
         });
-    
-        return;
     });
-
 });
 
 module.exports = router;
