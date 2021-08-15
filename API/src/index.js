@@ -12,7 +12,7 @@ const port = 3000;
 
 
 app.use(bodyParser())
-app.use('/createaccount', createAuthCode);
+app.use('/CreateAuthCode', createAuthCode);
 
 
 app.get('/', (req, res) => {

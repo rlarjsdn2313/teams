@@ -3,46 +3,12 @@ var router = express.Router();
 
 // import sending mail object
 var mail = require('../lib/mail');
+var checkStdntId = require('../lib/checkStdntId').checkStdntId;
 // import lib for connect to mysql DB server
 var createConn = require('../lib/mysqlConn');
 
 
-// checkStdntId
-var checkStdntId = (stdntId) => {
-    // check stdntId lenth
-    if (stdntId.length !== 5) {
-        return 'too long';
-    }
 
-
-    // check string
-    let numbers = '1234567890';
-
-    var i = 0;
-    while (i < stdntId.length) {
-        if (!numbers.includes(stdntId[i])) {
-            return 'format type error';
-        }
-        i++;
-    }
-
-    let grade = stdntId[0];
-    if (!'123'.includes(grade)) {
-        return 'grade error';
-    }
-
-    let cl = stdntId[2];
-    if (!'123456789'.includes(cl)) {
-        return 'class error';
-    }
-
-    let num = parseInt(`${stdntId[3]}${stdntId[4]}`);
-    if (!(1 <= num <= 35)) {
-        return 'num error';
-    }
-
-    return '';
-}
 
 /*
 {
@@ -101,10 +67,10 @@ router.post('/', (req, res) => {
         */
        
         // Create verification code in random
-        let code = parseInt(`${Math.floor(Math.random() * (9999 - 0)) + 0}`.padStart(4, '0'));
+        let code = `${Math.floor(Math.random() * (9999 - 0)) + 0}`.padStart(4, '0');
 
         // Send the verification code to DB
-        connection.query(`INSERT INTO auth_code VALUES (${stdntId}, ${code})`, (err) => {
+        connection.query(`INSERT INTO auth_code VALUES (${stdntId}, ${parseInt(code)})`, (err) => {
             if (err) throw err;
 
             // Send mail
