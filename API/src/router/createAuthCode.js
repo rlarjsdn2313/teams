@@ -54,10 +54,18 @@ let createCode = (stdntId, connection) => {
     stdntId: 학번
 }
 */
+
+let sendError = (res, message) => {
+    res.send({
+        error: true,
+        message: message,
+    });
+}
+
 router.post('/', (req, res) => {
 
     let reqKeyList = Object.keys(req.body);
-    
+
     // check stdntId in reqKeyList
     if (!reqKeyList.includes('stdntId')) {
         res.send({
@@ -81,33 +89,41 @@ router.post('/', (req, res) => {
         return;
     }
 
-    // if stdntId is already in user list then send error message
-    // connect to mysql server
+    // if stdntId already in user DB send ERROR
+    // create connection
     let connection = createConn.createConnection();
-    connection.connect()
+    connection.connect();
 
-    // check with DB
-    connection.query(`select exists (select StudentId from user where StudentId=${stdntId} limit 1) as succes;`, function(err, result, fileds) {
+    connection.query(`SELECT count(*) FROM user where StudentId = ${stdntId} ;`, (err, result, _) => {
         if (err) throw err;
-        console.log(result);
+        // count how many stdntId in user DB
+        if (result[0]['count(*)'] >= 1) {
+            // send error message
+            sendError(res, {
+                error: true,
+                message: 'this stdunt ID is already in user DB',
+            });
+            // quit router
+            return;
+        }
+
+        let authCode = '2313'
+
+        mail.sendMail(
+            mail.generateSchoolEmail(stdntId),
+            'JS talk 회원가입 인증 메일',
+            `인증 코드 : ${authCode}`,
+            `<b>인증 코드 : ${authCode}`,
+        );
+    
+        res.send({
+            error: false,
+            message: 'Authorization email sent'
+        });
+    
+        return;
     });
 
-    connection.end()
-    let authCode = '2313'
-
-    mail.sendMail(
-        mail.generateSchoolEmail(stdntId),
-        'JS talk 회원가입 인증 메일',
-        `인증 코드 : ${authCode}`,
-        `<b>인증 코드 : ${authCode}`,
-    );
-
-    res.send({
-        error: false,
-        message: 'Authorization email sent'
-    });
-
-    return;
 });
 
 module.exports = router;
