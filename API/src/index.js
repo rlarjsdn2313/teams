@@ -8,6 +8,7 @@ const bodyParser = require('body-parser');
 const createAuthCode = require('./router/createAuthCode');
 const createAccount = require('./router/createAccount');
 const getState = require('./router/getState');
+const changeState = require('./router/changeState');
 
 // listening port
 const port = 3000;
@@ -17,6 +18,7 @@ app.use(bodyParser())
 app.use('/CreateAuthCode', createAuthCode);
 app.use('/CreateAccount', createAccount);
 app.use('/GetState', getState);
+app.use('/ChangeState', changeState);
 
 
 app.get('/', (req, res) => {
