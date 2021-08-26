@@ -7,6 +7,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const createAuthCode = require('./router/createAuthCode');
 const createAccount = require('./router/createAccount');
+const getState = require('./router/getState');
 
 // listening port
 const port = 3000;
@@ -15,6 +16,7 @@ const port = 3000;
 app.use(bodyParser())
 app.use('/CreateAuthCode', createAuthCode);
 app.use('/CreateAccount', createAccount);
+app.use('/GetState', getState);
 
 
 app.get('/', (req, res) => {

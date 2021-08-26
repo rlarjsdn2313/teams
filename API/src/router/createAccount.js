@@ -4,11 +4,24 @@ Initialize Router
 var express = require('express');
 var router = express.Router();
 
-// import function for filter studentId
+// Import lib for crypto
+var crypto = require('crypto');
+// Import function for filter studentId
 var checkStdntId = require('../lib/checkStdntId').checkStdntId;
 // Import lib for connect to DB
 var createConn = require('../lib/mysqlConn');
 
+// It returns date for hash
+var getDate = () => {
+    let today = new Date();
+
+    let year = today.getFullYear();
+    let month = today.getMonth() + 1;
+    let date = today.getDate();
+    let day = today.getDay();
+
+    return `${year}${month}${day}`;
+}
 
 /*
 Create Account Router
@@ -130,39 +143,55 @@ router.post('/', (req, res) => {
     connection.connect();
 
     // query to DB
-    connection.query(`SELECT Code FROM auth_code WHERE StudentId=${stdntId};`, (err, result, fileds) => {
-        if (err) throw err;
-        let realAuthCode = result[0]['Code'];
-
-        // wrong auth code
-        if (realAuthCode != authCode) {
+    connection.query(`select EXISTS (select * from user where StudentId=${stdntId} limit 1) as success;`, (err, result, fileds) => {
+        if (result[0]['success'] == 1) {
             res.send({
                 error: true,
-                message: 'autCode is wrong'
+                message: 'account already created'
             });
             return;
         }
 
-        // delete code in DB
-        connection.query(`DELETE FROM auth_code WHERE Code=${realAuthCode}`, (err, result, fileds) => {
+        connection.query(`SELECT Code FROM auth_code WHERE StudentId=${stdntId};`, (err, result, fileds) => {
             if (err) throw err;
-        });
-
-
-        /*
-        4. Connect to user table and create account
-        */
-        // add user data
-        connection.query(`INSERT INTO user VALUES (${stdntId}, '${userName}', '${password}', 'basic', '', '');`, (err, result, fileds) => {
-            if (err) throw err;
-
-            res.send({
-                error: false,
-                message: 'Your Account Is Created!'
+            let realAuthCode = result[0]['Code'];
+    
+            // wrong auth code
+            if (realAuthCode != authCode) {
+                res.send({
+                    error: true,
+                    message: 'autCode is wrong'
+                });
+                return;
+            }
+    
+            // delete code in DB
+            connection.query(`DELETE FROM auth_code WHERE Code=${realAuthCode}`, (err, result, fileds) => {
+                if (err) throw err;
             });
-            return;
+    
+    
+            /*
+            4. Connect to user table and create account
+            */
+            // create session
+            var salt = crypto.randomBytes(128).toString('base64');
+            var session = crypto.createHash('sha256').update(password + getDate() + salt).digest('hex');
+    
+            // add user data
+            connection.query(`INSERT INTO user VALUES (${stdntId}, '${userName}', '${password}', 'free', '', '${session}');`, (err, result, fileds) => {
+                if (err) throw err;
+    
+                res.send({
+                    error: false,
+                    message: 'Your Account Is Created!',
+                    session: session,
+                });
+                return;
+            });
         });
     });
+    
 });
 
 
