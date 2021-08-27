@@ -34,7 +34,6 @@ router.post('/', (req, res) => {
     /*
     1. check Request
     */
-
     var neededList = ['stdntId', 'session', 'state'];
     var reqKeyList = Object.keys(req.body);
 

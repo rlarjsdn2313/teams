@@ -9,6 +9,7 @@ const createAuthCode = require('./router/createAuthCode');
 const createAccount = require('./router/createAccount');
 const getState = require('./router/getState');
 const changeState = require('./router/changeState');
+const login = require('./router/login');
 
 // listening port
 const port = 3000;
@@ -19,6 +20,7 @@ app.use('/CreateAuthCode', createAuthCode);
 app.use('/CreateAccount', createAccount);
 app.use('/GetState', getState);
 app.use('/ChangeState', changeState);
+app.use('/Login', login);
 
 
 app.get('/', (req, res) => {
